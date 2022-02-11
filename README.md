@@ -15,7 +15,7 @@ yarn add express-ve
 ```
 
 ## How do you create and start the app?
-```
+```javascript
 const {createContainer} = require('express-ve')
 const path = require('path') // optional
 
@@ -33,7 +33,7 @@ It's very simple and straightforward and yet createContainer creates a seamless 
 express-ve routing makes use of conventions on the folder structure and maps them to route paths. The mapping is inspired by [nuxtjs routing](https://nuxtjs.org/docs/get-started/routing/).
 
 First define a folder named `routes` at the root of your project.
-```
+```javascript
 /**
  * routes are registered according to the following convention
  * Path                            Route
@@ -48,7 +48,7 @@ First define a folder named `routes` at the root of your project.
 ```
 
 A single route has the following structure
-```
+```javascript
 # routes/users/_name.js
 module.exports = (container) => {
     return {
@@ -67,7 +67,7 @@ module.exports = (container) => {
 Middlewares can be defined in one of two ways per route or globally.
 #### Per Route
 Just as shown in the last code snippet above, you return from a route file an object with keys 'route' and middleware. The middleware is an array of all middlewares that will apply to this specific route.
-```
+```javascript
 const multer = require('multer')
 const upload = multer({storage})
 // const storage ... define your storage here
@@ -85,8 +85,8 @@ For example defining a middleware at the path `middlewares/v1.js` will protect a
 
 #### How do I define a global middleware
 First create a folder named middlewares at the root of your project and create your middleware file inside it. A single middleware file can look something like this:
-```
-# Here is a google authenticator middleware example
+```javascript
+// Here is a google authenticator middleware example
 const {OAuth2Client} = require("google-auth-library");
 module.exports = (container, route) => {
     return async (req, res, next) => {
@@ -125,7 +125,7 @@ Define your configurations inside a config folder at the root of your project, a
 
 ## Models
 You can define your models inside a folder named `db` at the root of your project. A single model looks like this:
-```
+```javascript
 module.exports = (mongoose) => {
     const UserSchema = new mongoose.Schema({
         name: String,
