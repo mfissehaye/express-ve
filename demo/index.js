@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { createContainer } = require('express-ve')
 
 createContainer().then((container) => {
