@@ -1,5 +1,7 @@
 # Express-ve express starter
-An express-ve way to start an [express](https://expressjs.com/) project
+An express-ve way to start an [express](https://expressjs.com/) project.
+
+#### Checkout a demo project [here](https://mfissehaye.github.com/express-ve/demo) or Learn how to use express-ve [here](https://mfissehaye.medium.com/how-to-create-an-expressjs-based-restful-api-using-express-ve-package-c94f488d55b5)
 
 Are you starting an [express](https://expressjs.com/) project? Are you adding some [routing](https://expressjs.com/en/guide/routing.html) to it? Do you plan to add some [mongodb](https://www.mongodb.com/) data using [mongoosejs](https://mongoosejs.com/)? Then you can start your project with express-ve and have default mappings accelerate your development.
 
