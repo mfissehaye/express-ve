@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { createContainer } = require('express-ve')
+const { createContainer } = require('../../../node-packages/node-ioc/index')
 
 createContainer().then((container) => {
     const { app } = container

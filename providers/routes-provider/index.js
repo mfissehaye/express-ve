@@ -105,7 +105,8 @@ module.exports = async (c) => {
                     .map(middleware => require(middleware.file)(_c, path))
 
                 routeMiddlewares = _union(routeMiddlewares, routeModule.middlewares || [])
-                router[method](`/${routePrefix}${path}`, ...routeMiddlewares, (req, res) => {
+                const computedPath = routePrefix ? `/${routePrefix}${path}` : path
+                router[method](computedPath, ...routeMiddlewares, (req, res) => {
                     return routeModule.route ?
                         routeModule.route(req, res) :
                         typeof routeModule === 'function' ?

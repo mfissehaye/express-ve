@@ -1,6 +1,6 @@
 module.exports = (container) => {
     return {
-        route: (req, res) => {
+        route: async (req, res) => {
             return res.json({ message: 'Welcome to the API' })
         }
     }
