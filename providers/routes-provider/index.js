@@ -15,7 +15,7 @@ const pathToRoute = (file, base = 'routes') => {
         const paramRoute = /^_((?!.*__.*)[a-zA-Z][a-zA-Z0-9_-]+)(.js)?/.exec(parts[j]);
         if (paramRoute) path += `/:${paramRoute[1]}`;
         else if (j === parts.length - 1) {
-            let result = parts[j].match(/^([_a-z0-9-]+)__(get|post|put|patch|delete).js$/i)
+            let result = parts[j].match(/^([_a-z0-9-]+)__(get|post|put|patch|delete|all).js$/i)
             if (result && result[1] && result[2]) {
                 method = result[2]
                 path += `/${result[1].replace(/^_/, ':')}`
@@ -141,9 +141,7 @@ module.exports = async (c) => {
             }
         }
 
-        router.all(`/${routePrefix}/*`, (req, res) => {
-            res.sendStatus(404)
-        })
+        require('./dynamic-routes')(_c, router, routePrefix)
 
         router.ready = true;
         return router;

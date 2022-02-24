@@ -18,7 +18,6 @@ module.exports = async (c) => {
             }
         }
     })
-    console.log(configs)
     c.service('config', () => {
         return {
             ...configs,

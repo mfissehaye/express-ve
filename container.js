@@ -3,9 +3,10 @@ const loggerProvider = require('./providers/logger-provider');
 const configProvider = require('./providers/config-provider');
 const appProvider = require('./providers/app-provider');
 const routesProvider = require('./providers/routes-provider');
+const socketsProvider = require('./providers/sockets-provider');
 const authenticationServiceProvider = require('./providers/authentication-service-provider');
 const authorizationServiceProvider = require('./providers/authorization-service-provider')
-const customProvidersProvider = require('./providers/custom-providers-provider')
+// const customProvidersProvider = require('./providers/custom-providers-provider')
 
 class Container {
   constructor() {
@@ -38,7 +39,8 @@ module.exports = async () => {
 
   await routesProvider(container); // router
   // await customProvidersProvider(container);
-  appProvider(container); // app
+  await appProvider(container) // app
+  await socketsProvider(container) // sockets
 
   return container;
 };

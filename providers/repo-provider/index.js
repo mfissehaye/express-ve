@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
-const blueBird = require('bluebird');
-const readdirp = require('readdirp');
-const pathResolver = require("path");
+// const mongoose = require('mongoose');
+const {MongoClient} = require('mongodb')
+// const blueBird = require('bluebird')
+const readdirp = require('readdirp')
+const pathResolver = require("path")
 const _camelCase = require('lodash/camelCase')
 const _upperFirst = require('lodash/upperFirst')
-const {model} = require("mongoose");
+// const {model} = require('mongoose')
 
-mongoose.Promise = blueBird;
-
+// mongoose.Promise = blueBird;
+//TODO check c in the next line is only passed to define services on it, they can't be accessed from it.
 module.exports = async (c) => {
     // We are using repo.ready to see if database is ready or not
     // If database is not ready every access to repo will throw an error
@@ -18,36 +19,51 @@ module.exports = async (c) => {
         }
     }));
 
+    const dbName = process.env.DB_NAME || (() => {
+        throw new Error('No db name provided')
+    })()
+    const dbHost = process.env.DB_HOST || 'localhost'
+    const dbPort = process.env.DB_PORT || 27017
+
+    const connectionString = `mongodb://${dbHost}:${dbPort}/?replicaSet=rs0&maxPoolSize=20&w=majority`
+    const client = new MongoClient(connectionString, {
+        useUnifiedTopology: true
+    })
+    await client.connect()
+
+    c.service('db', (_c) => {
+        return client.db(dbName)
+    })
+
     try {
-        if (mongoose.connections) await mongoose.connection.close()
-        const dbName = c.config.DB_NAME || (() => {
-            throw new Error('No db name provided')
-        })()
-        const dbHost = c.config.DB_HOST || 'localhost'
-        const dbPort = c.config.DB_PORT || 27017
-        await mongoose.connect(`mongodb://${dbHost}:${dbPort}/${dbName}`)
+        // if (mongoose.connections) await mongoose.connection.close()
+        // await mongoose.connect(`mongodb://${dbHost}:${dbPort}/${dbName}`)
 
-        if(c.config.NODE_ENV === 'development') {
-            mongoose.set('debug', true)
-            mongoose.connection.on('error', (err) => console.log('Mongoose Error: ', err))
-        }
+        // if (c.config.NODE_ENV === 'development') {
+        //     mongoose.set('debug', true)
+        //     mongoose.connection.on('error', (err) => console.log('Mongoose Error: ', err))
+        // }
 
-        const modelFiles = await readdirp.promise(pathResolver.resolve('./', 'db'))
-            .then((files) => files.map((f) => f.fullPath))
+        // const modelFiles = await readdirp.promise(pathResolver.resolve('./', 'db'))
+        //     .then((files) => files.map((f) => f.fullPath))
 
-        const modelNames = modelFiles.map(f => f.split('/').slice(-1).pop())
-        const defaultModelFiles = await readdirp.promise(__dirname + '/default-models/')
-            .then((files) => files
-                .map((f) => f.fullPath)
-                .filter(f => !modelNames.includes(f.split('/').slice(-1).pop())))
+        // const modelNames = modelFiles.map(f => f.split('/').slice(-1).pop())
+        // const defaultModelFiles = await readdirp.promise(__dirname + '/default-models/')
+        //     .then((files) => files
+        //         .map((f) => f.fullPath)
+        //         .filter(f => !modelNames.includes(f.split('/').slice(-1).pop())))
 
-        modelFiles.forEach(file => require(file)(mongoose))
-        defaultModelFiles.forEach(file => require(file)(mongoose))
+        // modelFiles.forEach(file => require(file)(mongoose))
+        // defaultModelFiles.forEach(file => require(file)(mongoose))
+
+        // const repoFiles = await readdirp.promise(pathResolver.resolve('./', 'repo'))
+        //     .then((files) => files.map((f) => f.fullPath))
+
+        // c.service('model', (_c) => (name) => mongoose.model(name))
 
         const repoFiles = await readdirp.promise(pathResolver.resolve('./', 'repo'))
             .then((files) => files.map((f) => f.fullPath))
 
-        c.service('model', (_c) => (name) => mongoose.model(name))
         c.service('repo', (_c) => {
             const repos = {}
             repoFiles.forEach(file => {
@@ -65,20 +81,20 @@ module.exports = async (c) => {
             return new Proxy(repos, {
                 get(object, key) {
                     if (key === 'ready') return true
-                    if (key === 'mongoose') return mongoose
-                    const modelName = _upperFirst(_camelCase(key))
+                    // if (key === 'mongoose') return mongoose
+                    const modelName = /*_upperFirst*/(_camelCase(key))
 
                     let defaultMethods = {}
 
                     try {
-                        const Model = mongoose.model(modelName)
+                        // const Model = mongoose.model(modelName)
                         defaultMethods = {
-                            get: require('./default-methods/get')(Model, modelName),
-                            create: require('./default-methods/create')(Model, modelName),
-                            createMany: require('./default-methods/createMany')(Model, modelName),
-                            delete: require('./default-methods/delete')(Model, modelName),
-                            all: require('./default-methods/all')(Model, modelName),
-                            update: require('./default-methods/update')(Model, modelName),
+                            get: require('./default-methods/get')(_c.db, modelName),
+                            create: require('./default-methods/create')(_c.db, modelName),
+                            createMany: require('./default-methods/createMany')(_c.db, modelName),
+                            delete: require('./default-methods/delete')(_c.db, modelName),
+                            all: require('./default-methods/all')(_c.db, modelName),
+                            update: require('./default-methods/update')(_c.db, modelName),
                         }
                     } catch (ex) {
                         console.error(`Model ${modelName} does not exist`)
@@ -94,5 +110,8 @@ module.exports = async (c) => {
         });
     } catch (error) {
         c.logger.log('Mongo Error: ', error);
+    } finally {
+        // if (client) await client.close()
+        //TODO provide some way to perform destruction once all services are done running
     }
 };

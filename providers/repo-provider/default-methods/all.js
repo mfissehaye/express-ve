@@ -1,8 +1,17 @@
 const _omit = require('lodash/omit')
 const _pick = require('lodash/pick')
 
-module.exports = (Model) => {
+module.exports = (db, Model) => {
     return async (params) => {
+        let cursor
+        try {
+            const modelCollection = db.collection(Model)
+            cursor = await modelCollection.find()
+            return await cursor.toArray()
+        } finally {
+            if (cursor) cursor.close()
+        }
+
         const modelFields = Object.keys(_omit(Model.schema.paths, ['_id', '__v']))
 
         const limit = parseInt(params.limit)
@@ -14,27 +23,27 @@ module.exports = (Model) => {
 
         let dbQuery = Model.find(queryFields);
 
-        if(params.page) {
-            dbQuery = dbQuery.sort({ createdAt: -1 })
+        if (params.page) {
+            dbQuery = dbQuery.sort({createdAt: -1})
                 .skip((page - 1) * limit)
 
-            if(limit) dbQuery = dbQuery.limit(limit)
+            if (limit) dbQuery = dbQuery.limit(limit)
 
-            if(populates) {
+            if (populates) {
                 populates.forEach(p => {
                     dbQuery.populate(p)
                 })
             }
             const [results, total] = await Promise.all([dbQuery, await Model.countDocuments({})])
-            return { results, page, total }
+            return {results, page, total}
         }
 
         dbQuery = dbQuery
-            .sort({ createdAt: -1 })
+            .sort({createdAt: -1})
 
-        if(limit) dbQuery = dbQuery.limit(limit)
+        if (limit) dbQuery = dbQuery.limit(limit)
 
-        if(populates) {
+        if (populates) {
             populates.forEach(p => {
                 dbQuery.populate(p)
             })

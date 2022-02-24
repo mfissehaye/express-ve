@@ -1,38 +1,51 @@
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const express = require('express');
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const express = require('express')
+const {createServer} = require('http')
+const {Server} = require('socket.io')
 const path = require('path')
+const {createAdapter} = require('@socket.io/mongo-adapter')
 
-module.exports = (c) => {
-  const app = express();
-  c.service('app', (_c) => {
-    if (!_c.router.ready) throw new Error('Routes are not ready');
+module.exports = async (c) => {
+    let httpServer
+    const app = express()
 
-    // CORS Configuration
-    app.use(cors());
-    app.options('*', cors());
+    c.service('app', (_c) => {
+        try {
+            if (!_c.router.ready) throw new Error('Routes are not ready');
 
-    // Configure JSON Parser and Promises
-    app.use(bodyParser.json({ limit: '25mb' }));
-    app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
+            // CORS Configuration
+            app.use(cors())
+            // app.options('*', cors())
+            // app.get('*', cors())
 
-    // catch 404 and forward to error handler
-    // app.use((req, res, next) => {
-    //   const err = new Error('Not Found')
-    //   console.log(err)
-    //   err.status = 404
-    //   res.send('Route not found')
-    //   next(err)
-    // })
+            // Configure JSON Parser and Promises
+            app.use(bodyParser.json({limit: '25mb'}));
+            app.use(bodyParser.urlencoded({extended: true, limit: '25mb'}));
 
-    app.static = (path, route) => route ? app.use(route, express.static(path)) : app.use(express.static(path))
-    // app.use(express.static(path.resolve('../frontend/dist', 'assets')))
-    app.use('uploads', express.static(path.resolve('uploads')))
-    app.use('/', _c.router);
+            // catch 404 and forward to error handler
+            // app.use((req, res, next) => {
+            //   const err = new Error('Not Found')
+            //   console.log(err)
+            //   err.status = 404
+            //   res.send('Route not found')
+            //   next(err)
+            // })
 
-    app.addProvider = (provider) => {
-      provider(_c)
-    }
-    return app;
-  });
-};
+            app.static = (path, route) => route ? app.use(route, express.static(path)) : app.use(express.static(path))
+            // app.use(express.static(path.resolve('../frontend/dist', 'assets')))
+            app.use('uploads', express.static(path.resolve('uploads')))
+            app.use('/', _c.router)
+
+            httpServer = createServer(app)
+            app.server = httpServer
+
+            // app.addProvider = (provider) => {
+            //     provider(_c)
+            // }
+            return app
+        } catch (err) {
+            console.error('App init error: ', err)
+        }
+    })
+}
