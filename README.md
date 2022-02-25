@@ -22,8 +22,8 @@ const {createContainer} = require('express-ve')
 const path = require('path') // optional
 
 createContainer().then((container) => {
-    # Listen as usual
-    app.listen(8000 /* PORT */).on('listening', () => {
+    // Listen as usual
+    app.server.listen(8000 /* PORT */).on('listening', () => {
         console.log(`App live and listening on port 8000`)
     })
 })
@@ -51,7 +51,7 @@ First define a folder named `routes` at the root of your project.
 
 A single route has the following structure
 ```javascript
-# routes/users/_name.js
+// routes/users/_name.js
 module.exports = (container) => {
     return {
         route: async (req, res) => {
@@ -92,7 +92,7 @@ First create a folder named middlewares at the root of your project and create y
 const {OAuth2Client} = require("google-auth-library");
 module.exports = (container, route) => {
     return async (req, res, next) => {
-        # You can add exception to a global middleware like below
+        // You can add exception to a global middleware like below
         if (route.startsWith('/v1/auth') || route.startsWith('/v1/telegram/handler/'))
             return next()
 
