@@ -1,11 +1,18 @@
 const getPermissionsMiddleware = require("./permissions-middleware");
 module.exports = (container, router, routePrefix) => {
-    router.get(`/${routePrefix}/:collection`, (req, res, next) => {
+    const collectionMiddleware = (req, res, next) => {
         const repo = req.params.collection
-        const middleware = getPermissionsMiddleware(container, repo, 'read')
+        const middleware = getPermissionsMiddleware(container, repo, 'write')
         return middleware(req, res, next)
-    }, (req, res) => {
+    }
+
+    router.get(`/${routePrefix}/:collection`, collectionMiddleware, (req, res) => {
         const route = require('./default-routes/list')(container, req.params.collection)
+        return route(req, res)
+    })
+
+    router.post(`/${routePrefix}/:collection`, collectionMiddleware, (req, res) => {
+        const route = require('./default-routes/create')(container, req.params.collection)
         return route(req, res)
     })
 

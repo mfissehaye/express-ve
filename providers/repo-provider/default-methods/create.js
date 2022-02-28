@@ -1,5 +1,5 @@
-module.exports = (Model) => {
+module.exports = (db, Model) => {
     return (data) => {
-        return Model.create(data)
+        return db.collection(Model).insertOne(data)
     }
 }

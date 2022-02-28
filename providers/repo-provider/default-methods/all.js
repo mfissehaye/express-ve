@@ -6,8 +6,7 @@ module.exports = (db, Model) => {
         let cursor
         try {
             const modelCollection = db.collection(Model)
-            cursor = await modelCollection.find()
-            return await cursor.toArray()
+            return modelCollection.find().toArray()
         } finally {
             if (cursor) cursor.close()
         }

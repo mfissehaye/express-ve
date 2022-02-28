@@ -31,7 +31,7 @@ class Container {
 
 module.exports = async () => {
   const container = new Container();
-  configProvider(container); // config
+  await configProvider(container); // config
   loggerProvider(container); // logger
   await repoProvider(container); // repo
   authenticationServiceProvider(container); // authentication
@@ -41,6 +41,8 @@ module.exports = async () => {
   // await customProvidersProvider(container);
   await appProvider(container) // app
   await socketsProvider(container) // sockets
+
+  container.sockets // this initializes the socket provider
 
   return container;
 };
